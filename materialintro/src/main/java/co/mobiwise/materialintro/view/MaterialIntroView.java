@@ -431,9 +431,10 @@ public class MaterialIntroView extends RelativeLayout {
      * Dismiss Material Intro View
      */
     public void dismiss() {
-        if(!isIdempotent) {
-            preferencesManager.setDisplayed(materialIntroViewId);
-        }
+        //TODO is was removed temporally to test
+//        if(!isIdempotent) {
+//            preferencesManager.setDisplayed(materialIntroViewId);
+//        }
 
         AnimationFactory.animateFadeOut(this, fadeAnimationDuration, new AnimationListener.OnAnimationEndListener() {
             @Override
@@ -725,8 +726,9 @@ public class MaterialIntroView extends RelativeLayout {
             return this;
         }
 
-        public Builder setIdempotent(boolean idempotent) {
-            materialIntroView.setIdempotent(idempotent);
+        public Builder setIdempotent(boolean idempotent_) {
+            materialIntroView.setIdempotent(idempotent_);
+            //commit here to see if this field shows up
             return this;
         }
 
