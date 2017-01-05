@@ -431,10 +431,9 @@ public class MaterialIntroView extends RelativeLayout {
      * Dismiss Material Intro View
      */
     public void dismiss() {
-        //TODO is was removed temporally to test
-//        if(!isIdempotent) {
-//            preferencesManager.setDisplayed(materialIntroViewId);
-//        }
+        if(!isIdempotent) {
+            preferencesManager.setDisplayed(materialIntroViewId);
+        }
 
         AnimationFactory.animateFadeOut(this, fadeAnimationDuration, new AnimationListener.OnAnimationEndListener() {
             @Override
