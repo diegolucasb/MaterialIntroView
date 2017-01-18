@@ -485,7 +485,8 @@ public class MaterialIntroView extends RelativeLayout {
                             0,
                             0,
                             0,
-                            height - (targetShape.getPoint().y + targetShape.getHeight() / 2) + 2 * targetShape.getHeight() / 2);
+                            height - targetShape.getPoint().y + targetShape.getHeight() /2);
+//                            height - (targetShape.getPoint().y + targetShape.getHeight() / 2) + 2 * targetShape.getHeight() / 2);
                 }
 
                 infoView.setLayoutParams(infoDialogParams);
