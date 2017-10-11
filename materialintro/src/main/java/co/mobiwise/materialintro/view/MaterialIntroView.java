@@ -11,14 +11,19 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Build;
 import android.os.Handler;
+import android.support.graphics.drawable.VectorDrawableCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -32,6 +37,7 @@ import co.mobiwise.materialintro.prefs.PreferencesManager;
 import co.mobiwise.materialintro.shape.Circle;
 import co.mobiwise.materialintro.shape.Focus;
 import co.mobiwise.materialintro.shape.FocusGravity;
+import co.mobiwise.materialintro.shape.LayoutType;
 import co.mobiwise.materialintro.shape.Rect;
 import co.mobiwise.materialintro.shape.Shape;
 import co.mobiwise.materialintro.shape.ShapeType;
@@ -165,15 +171,20 @@ public class MaterialIntroView extends RelativeLayout {
     private boolean isDotViewEnabled;
 
     /**
+     * Image type
+     */
+    private LayoutType layoutType;
+
+    /**
      * Info Dialog Icon
      */
     private ImageView imageViewIcon;
 
-    /**
-     * Image View will be shown if
-     * this is true
-     */
-    private boolean isImageViewEnabled;
+//    /**
+//     * Image View will be shown if
+//     * this is true
+//     */
+//    private boolean isImageViewEnabled;
 
     /**
      * Save/Retrieve status of MaterialIntroView
@@ -222,26 +233,31 @@ public class MaterialIntroView extends RelativeLayout {
 
     public MaterialIntroView(Context context) {
         super(context);
-        init(context);
+        init(context, LayoutType.LAYOUT_INFO_CARVIEW);
     }
 
-    public MaterialIntroView(Context context, AttributeSet attrs) {
+    public MaterialIntroView(Context context, LayoutType layoutType) {
+        super(context);
+        init(context, layoutType);
+    }
+
+    public MaterialIntroView(Context context, LayoutType layoutType, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+        init(context, layoutType);
     }
 
-    public MaterialIntroView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public MaterialIntroView(Context context, LayoutType layoutType, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context);
+        init(context, layoutType);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public MaterialIntroView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public MaterialIntroView(Context context, LayoutType layoutType, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init(context);
+        init(context, layoutType);
     }
 
-    private void init(Context context) {
+    private void init(Context context, LayoutType type) {
         setWillNotDraw(false);
         setVisibility(INVISIBLE);
 
@@ -263,8 +279,9 @@ public class MaterialIntroView extends RelativeLayout {
         isInfoEnabled = false;
         isDotViewEnabled = false;
         isPerformClick = false;
-        isImageViewEnabled = true;
         isIdempotent = false;
+        //original one
+        layoutType = type;
 
         /**
          * initialize objects
@@ -278,7 +295,10 @@ public class MaterialIntroView extends RelativeLayout {
         eraser.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         eraser.setFlags(Paint.ANTI_ALIAS_FLAG);
 
-        View layoutInfo = LayoutInflater.from(getContext()).inflate(R.layout.material_intro_card, null);
+//        View layoutInfo = LayoutInflater.from(getContext()).inflate(R.layout.material_intro, null);
+        View layoutInfo = LayoutInflater.from(getContext()).inflate(
+                layoutType.equals(LayoutType.LAYOUT_INFO_CARVIEW)?R.layout.material_intro_card:R.layout.material_intro,
+                null);
 
         infoView = layoutInfo.findViewById(R.id.info_layout);
         textViewInfo = (TextView) layoutInfo.findViewById(R.id.textview_info);
@@ -470,8 +490,9 @@ public class MaterialIntroView extends RelativeLayout {
 
                 RelativeLayout.LayoutParams infoDialogParams = new RelativeLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.FILL_PARENT);
+                        ViewGroup.LayoutParams.MATCH_PARENT);
 
+                boolean isTop = false;
                 if (targetShape.getPoint().y < height / 2) {
                     ((RelativeLayout) infoView).setGravity(Gravity.TOP);
                     infoDialogParams.setMargins(
@@ -479,6 +500,8 @@ public class MaterialIntroView extends RelativeLayout {
                             targetShape.getPoint().y + targetShape.getHeight() / 2,
                             0,
                             0);
+
+                    isTop = true;
                 } else {
                     ((RelativeLayout) infoView).setGravity(Gravity.BOTTOM);
                     infoDialogParams.setMargins(
@@ -492,15 +515,72 @@ public class MaterialIntroView extends RelativeLayout {
                 infoView.setLayoutParams(infoDialogParams);
                 infoView.postInvalidate();
 
-                addView(infoView);
+                //set image according to its layout
+                if(layoutType.equals(LayoutType.LAYOUT_INFO_CARVIEW)){
+                    imageViewIcon.setImageResource(R.drawable.icon_question);
+                }else if(layoutType.equals(LayoutType.LAYOUT_ARROW)){
+                    VectorDrawableCompat imageVector = VectorDrawableCompat.create(getContext().getResources(), R.drawable.icon_arrow, getContext().getTheme());
+                    imageViewIcon.setImageDrawable(imageVector);
 
-                if (!isImageViewEnabled){
-                    imageViewIcon.setVisibility(GONE);
+                    RelativeLayout.LayoutParams imageParams = new RelativeLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                    );
+
+                    int marginLeft = targetView.getRect().left + (targetView.getRect().width()/4);
+                    if(isTop){
+                        imageParams.addRule(ALIGN_PARENT_TOP);
+                        imageParams.setMargins(marginLeft, 16, 0, 0);
+                    }else{
+                        imageParams.addRule(ALIGN_PARENT_BOTTOM);
+                        imageParams.setMargins(marginLeft, 0, 0, 16);
+                    }
+                    imageViewIcon.setLayoutParams(imageParams);
+
+
+                    RelativeLayout.LayoutParams textViewParams = new RelativeLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                    );
+                    if(isTop){
+                        textViewParams.addRule(BELOW, imageViewIcon.getId());
+                    }else{
+                        textViewParams.addRule(ALIGN_PARENT_BOTTOM);
+                        //left, top, right, bottom
+                        int marginBottom = imageViewIcon.getDrawable().getIntrinsicHeight();
+                        marginBottom += marginBottom/4;
+                        textViewParams.setMargins(50, 0, 50, marginBottom);
+                    }
+                    textViewInfo.setLayoutParams(textViewParams);
+                    textViewInfo.setTextColor(ContextCompat.getColor(getContext(), android.R.color.white));
+
+                    adjustTextAlignmentAccordingToImgePosition(textViewInfo, marginLeft);
+
                 }
+
+
+
+                addView(infoView);
 
                 infoView.setVisibility(VISIBLE);
             }
         });
+    }
+
+    private void adjustTextAlignmentAccordingToImgePosition(TextView textViewInfo, int marginLeft) {
+        Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
+
+        int width = metrics.widthPixels/2;
+
+        if(marginLeft < width-10){
+            textViewInfo.setTextAlignment(TEXT_ALIGNMENT_TEXT_START);
+        }else if(marginLeft > width +10){
+            textViewInfo.setTextAlignment(TEXT_ALIGNMENT_TEXT_END);
+        }else{
+            textViewInfo.setTextAlignment(TEXT_ALIGNMENT_CENTER);
+        }
     }
 
     private void setDotViewLayout() {
@@ -550,6 +630,10 @@ public class MaterialIntroView extends RelativeLayout {
         this.shapeType = shape;
     }
 
+    private void setlayoutType(LayoutType layoutType) {
+        this.layoutType = layoutType;
+    };
+
     private void setReady(boolean isReady) {
         this.isReady = isReady;
     }
@@ -593,10 +677,6 @@ public class MaterialIntroView extends RelativeLayout {
 
     private void enableInfoDialog(boolean isInfoEnabled) {
         this.isInfoEnabled = isInfoEnabled;
-    }
-
-    private void enableImageViewIcon(boolean isImageViewEnabled){
-        this.isImageViewEnabled = isImageViewEnabled;
     }
 
     private void setIdempotent(boolean idempotent){
@@ -644,6 +724,11 @@ public class MaterialIntroView extends RelativeLayout {
         private Activity activity;
 
         private Focus focusType = Focus.MINIMUM;
+
+        public Builder(Activity activity, LayoutType layoutType) {
+            this.activity = activity;
+            materialIntroView = new MaterialIntroView(activity, layoutType);
+        }
 
         public Builder(Activity activity) {
             this.activity = activity;
@@ -721,11 +806,6 @@ public class MaterialIntroView extends RelativeLayout {
             return this;
         }
 
-        public Builder enableIcon(boolean isImageViewIconEnabled) {
-            materialIntroView.enableImageViewIcon(isImageViewIconEnabled);
-            return this;
-        }
-
         public Builder setIdempotent(boolean idempotent_) {
             materialIntroView.setIdempotent(idempotent_);
             //commit here to see if this field shows up
@@ -752,6 +832,12 @@ public class MaterialIntroView extends RelativeLayout {
             materialIntroView.setPerformClick(isPerformClick);
             return this;
         }
+
+        public Builder setLayoutType(LayoutType layoutType) {
+            materialIntroView.setlayoutType(layoutType);
+            return this;
+        }
+
 
         public MaterialIntroView build() {
             if(materialIntroView.usesCustomShape) {

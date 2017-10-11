@@ -3,6 +3,7 @@ package co.mobiwise.materialintro;
 
 import co.mobiwise.materialintro.shape.Focus;
 import co.mobiwise.materialintro.shape.FocusGravity;
+import co.mobiwise.materialintro.shape.LayoutType;
 import co.mobiwise.materialintro.utils.Constants;
 
 public class MaterialIntroConfiguration {
@@ -25,8 +26,6 @@ public class MaterialIntroConfiguration {
 
     private boolean isDotViewEnabled;
 
-    private boolean isImageViewEnabled;
-
     public MaterialIntroConfiguration() {
         maskColor = Constants.DEFAULT_MASK_COLOR;
         delayMillis = Constants.DEFAULT_DELAY_MILLIS;
@@ -37,7 +36,6 @@ public class MaterialIntroConfiguration {
         isFadeAnimationEnabled = false;
         dismissOnTouch = false;
         isDotViewEnabled = false;
-        isImageViewEnabled = true;
     }
 
     public int getMaskColor() {
@@ -108,11 +106,8 @@ public class MaterialIntroConfiguration {
         return isDotViewEnabled;
     }
 
-    public boolean isImageViewEnabled(){
-        return isImageViewEnabled;
-    }
-
     public void setDotViewEnabled(boolean dotViewEnabled) {
         isDotViewEnabled = dotViewEnabled;
     }
+
 }
