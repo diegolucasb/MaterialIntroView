@@ -9,10 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import java.util.Random;
+
 import co.mobiwise.materialintro.prefs.PreferencesManager;
 import co.mobiwise.materialintro.shape.Focus;
 import co.mobiwise.materialintro.shape.FocusGravity;
-import co.mobiwise.materialintro.shape.ShapeType;
+import co.mobiwise.materialintro.shape.LayoutType;
 import co.mobiwise.materialintro.view.MaterialIntroView;
 import co.mobiwise.sample.R;
 
@@ -21,7 +23,7 @@ import co.mobiwise.sample.R;
  */
 public class MainFragment extends Fragment implements View.OnClickListener{
 
-    private static final String INTRO_CARD = "material_intro";
+    private static final String INTRO_CARD = "material_intro1";
 
     private CardView cardView;
     private Button button;
@@ -35,7 +37,9 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         button.setOnClickListener(this);
 
         //Show intro
-        showIntro(cardView, INTRO_CARD, "This is card! Hello There. You can set this text!");
+        String random = new Random().nextInt() + "";
+//        showIntro(cardView, INTRO_CARD, "This is card! Hello There. You can set this text!");
+        showIntro(cardView, random, "This is card! Hello There. You can set this text!");
 
         return view;
     }
@@ -49,18 +53,34 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     }
 
     private void showIntro(View view, String usageId, String text){
+//        new MaterialIntroView.Builder(getActivity())
+//                .enableDotAnimation(true)
+//                //.enableIcon(false)
+//                .setFocusGravity(FocusGravity.CENTER)
+//                .setFocusType(Focus.MINIMUM)
+//                .setDelayMillis(200)
+//                .enableFadeAnimation(true)
+//                .performClick(true)
+//                .setInfoText(text)
+//                .setTarget(view)
+//                .setShape(ShapeType.RECTANGLE)
+//                .setUsageId(usageId) //THIS SHOULD BE UNIQUE ID
+//                .show();
+
+
         new MaterialIntroView.Builder(getActivity())
-                .enableDotAnimation(true)
-                //.enableIcon(false)
+                .enableDotAnimation(false)
                 .setFocusGravity(FocusGravity.CENTER)
-                .setFocusType(Focus.MINIMUM)
+                .setFocusType(Focus.NORMAL)
                 .setDelayMillis(200)
                 .enableFadeAnimation(true)
                 .performClick(true)
                 .setInfoText(text)
+                .setTextColor(android.R.color.white)
+                .setMaskColor(R.color.background)
                 .setTarget(view)
-                .setShape(ShapeType.RECTANGLE)
                 .setUsageId(usageId) //THIS SHOULD BE UNIQUE ID
                 .show();
+
     }
 }

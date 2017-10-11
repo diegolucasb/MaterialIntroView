@@ -51,6 +51,9 @@ public class FocusFragment extends Fragment implements MaterialIntroListener{
                 .setListener(this)
                 .performClick(true)
                 .setInfoText(text)
+                .setTextColor(android.R.color.white)
+//                .setIconType()
+                .setMaskColor(R.color.background)
                 .setTarget(view)
                 .setUsageId(id) //THIS SHOULD BE UNIQUE ID
                 .show();
